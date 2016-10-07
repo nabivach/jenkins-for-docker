@@ -1,0 +1,60 @@
+#!/bin/bash -eu
+
+# Script for updating specific Android SDK packages
+# @author Andrew Kochura (andrewkochura@gmail.com)
+#
+# Usage example:
+# export ANDROID_HOME="${pwd()}/android-sdk"
+# sh android-update-sdk --components=platform-tools,tools,build-tools-24.0.2 --accept-licenses=android-sdk-license-.+
+
+set +e
+
+if [ -z ${ANDROID_HOME// } ]
+then
+    echo ERROR: ANDROID_HOME environment variable is not find
+    echo "This script will not work without a ANDROID_HOME"
+    exit 1 # terminate and indicate error
+else
+    echo "ANDROID_HOME watch to $ANDROID_HOME"
+fi
+
+SDK_MANAGING_TOOLS_DIR=/usr/local/bin
+
+# Defaults
+COMPONENTS=""
+ACCEPT_LICENSES=""
+
+for i in "$@"
+do
+case $i in
+    --components=*)
+    COMPONENTS=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
+    ;;
+    --accept-licenses=*)
+    ACCEPT_LICENSES=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
+    ;;
+    *)
+    # unknown option
+    ;;
+esac
+done
+
+echo "Check, Android SDK is installed?"
+if [ -e $ANDROID_HOME/tools/android ]
+then
+    echo "Android SDK is installed to $ANDROID_HOME"
+else
+    echo ERROR: Android SDK does not installed.
+    exit 1 # terminate and indicate error
+fi
+
+# Install components
+ALL_INSTALL=$COMPONENTS
+
+if [ -z "$ALL_INSTALL" ]
+then
+    echo "No update components"
+else
+    echo "Updating $ALL_INSTALL"
+    android-accept-sdk-license "$ANDROID_HOME/tools/android update sdk --no-ui --all --filter $ALL_INSTALL" "$ACCEPT_LICENSES"
+fi

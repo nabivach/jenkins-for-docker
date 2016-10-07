@@ -1,0 +1,62 @@
+#!/bin/bash -eu
+
+# Script for downloading Android SDK (if needed) and extract it to building workspace
+# @author Andrew Kochura (andrewkochura@gmail.com)
+#
+# Usage example:
+# export ANDROID_HOME="${pwd()}/android-sdk" (/android-sdk is automatically created in the workspace)
+# sh android-sdk-producer android-sdk_r24.4.1-linux.tgz
+
+set -e
+
+if [ -z ${ANDROID_HOME// } ]
+then
+    echo ERROR: ANDROID_HOME environment variable is not find
+    echo "This script will not work without a ANDROID_HOME"
+    exit 1 # terminate and indicate error
+else
+    echo "ANDROID_HOME watch to $ANDROID_HOME"
+fi
+
+# Constants
+SDK_FILE=""
+SDK_DOWNLOAD_URL=https://dl.google.com/android
+
+ANDROID_SDK_SOURCE_DIR=$JENKINS_HOME/Downloads/android-sdk-source
+
+# Defaults
+COMPONENT=$1
+
+if [ -n "$COMPONENT" ]; then
+    SDK_FILE="$COMPONENT"
+fi
+
+if [ -z ${SDK_FILE// } ]
+then
+    echo ERROR: SDK_FILE argument could not be found
+    exit 1 # terminate and indicate error
+else
+    echo "Android SDK file is $SDK_FILE"
+fi
+
+if [ -e $ANDROID_SDK_SOURCE_DIR/$SDK_FILE ]
+then
+    echo "Android SDK source is exists"
+else
+    echo "Android SDK source start downloading"
+
+    echo "Cleanup $ANDROID_SDK_SOURCE_DIR"
+    rm -rf $ANDROID_SDK_SOURCE_DIR
+    mkdir -p $ANDROID_SDK_SOURCE_DIR
+
+    echo "Downloading Android SDK source $SDK_DOWNLOAD_URL/$SDK_FILE to $ANDROID_SDK_SOURCE_DIR/$SDK_FILE"
+    wget -c -O $ANDROID_SDK_SOURCE_DIR/$SDK_FILE $SDK_DOWNLOAD_URL/$SDK_FILE --progress=bar:force 2>&1
+
+    echo "$SDK_FILE is downloaded"
+fi
+
+rm -rf $ANDROID_HOME
+mkdir -p $ANDROID_HOME
+
+echo "Extracting SDK from $ANDROID_SDK_SOURCE_DIR/$SDK_FILE/{android sdk source folder} to $ANDROID_HOME"
+tar -xzf $ANDROID_SDK_SOURCE_DIR/$SDK_FILE --strip 1 --directory $ANDROID_HOME 2>&1
