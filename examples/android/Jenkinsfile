@@ -1,0 +1,68 @@
+node {
+
+    def gradleOptions='-Dorg.gradle.jvmargs="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError"'
+
+    env.ANDROID_HOME="${pwd()}/android-sdk"
+    env.GRADLE_OPTS="${gradleOptions}"
+
+    stage ('Preparation') {
+        // Get some code from a GitHub repository
+        checkout scm
+    }
+
+    stage ('Providing Android SDK') {
+        sh "android-sdk-producer android-sdk_r24.4.1-linux.tgz"
+    }
+
+    stage ('Update Android SDK') {
+        parallel(
+                tools: {
+                    sh "android-update-sdk \
+              --components=platform-tools,tools,build-tools-24.0.2 \
+              --accept-licenses=android-sdk-license-.+"
+                },
+                android: {
+                    sh "android-update-sdk \
+              --components=android-24 \
+              --accept-licenses=android-sdk-license-.+"
+                },
+                extraandroid: {
+                    sh "android-update-sdk \
+              --components=extra-android-support,extra-android-m2repository \
+              --accept-licenses=android-sdk-license-.+"
+                },
+                extragoogle: {
+                    sh "android-update-sdk \
+              --components=extra-google-google_play_services,extra-google-m2repository \
+              --accept-licenses=android-sdk-license-.+"
+                }
+        )
+    }
+
+    stage ('Test') {
+        sh "./gradlew example:test"
+    }
+
+    stage ('Publication App to Fabric') {
+        if (env.BRANCH_NAME == 'master') {
+            sh "printenv"
+
+            env.FABRIC_GROUP='android-test'
+            env.FABRIC_NOTES='This is build from branch ' + env.BRANCH_NAME
+            env.FABRIC_DESCRIPTION='This build powered by Jenkins CI'
+
+            sh "echo FABRIC_GROUP = ${FABRIC_GROUP}"
+            sh "echo FABRIC_NOTES = ${FABRIC_NOTES}"
+
+            sh "echo ${env.BRANCH_NAME} is branch for upload distribution build to Fabric"
+            sh "./gradlew example:clean example:assembleDebug"
+            sh "./gradlew example:fabricGenerateResourcesDebug example:crashlyticsUploadDistributionDebug"
+        } else {
+            sh "echo ${env.BRANCH_NAME} is not branch for upload distribution build to Fabric"
+        }
+    }
+
+    stage ('Clean-up') {
+        deleteDir()
+    }
+}

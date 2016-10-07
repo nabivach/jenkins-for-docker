@@ -22,7 +22,7 @@ docker volume rm jenkins_home
 ````
 
 ### Android SDK usage
->For correct use the android sdk tools for multithreading builds android projects, you must declare ANDROID_HOME in the project workspace directory.
+>For correct use the android sdk tools for multithreading builds android projects, you must declare `ANDROID_HOME` in the project workspace directory.
 
 For setup Android SDK to your current workspace
 ````sh
@@ -33,3 +33,4 @@ For updating Android SDK packages inside your workspace
 ````sh
 sh "android-update-sdk --components=platform-tools,tools,build-tools-24.0.2 --accept-licenses=android-sdk-license-.+"
 ````
+Example [Jenkinsfile](examples/android/Jenkinsfile) for Android projects
