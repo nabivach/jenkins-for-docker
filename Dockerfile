@@ -69,9 +69,18 @@ COPY install-plugins.sh /usr/local/bin/install-plugins.sh
 COPY jenkins-support /usr/local/bin/jenkins-support
 COPY jenkins.sh /usr/local/bin/jenkins.sh
 
+COPY android-sdk-tools/android-update-sdk /usr/local/bin/android-update-sdk
+COPY android-sdk-tools/android-sdk-producer /usr/local/bin/android-sdk-producer
+COPY android-sdk-tools/android-accept-sdk-license /usr/local/bin/android-accept-sdk-license
+COPY android-sdk-tools/android_wait_for_emulator /usr/local/bin/android_wait_for_emulator
+
 USER root
 
-RUN chmod +x /usr/local/bin/jenkins.sh
+RUN chmod +x /usr/local/bin/jenkins.sh \
+             /usr/local/bin/android-update-sdk \
+             /usr/local/bin/android-sdk-producer \
+             /usr/local/bin/android-accept-sdk-license \
+             /usr/local/bin/android_wait_for_emulator
 
 USER ${user}
 
