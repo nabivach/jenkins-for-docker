@@ -1,4 +1,6 @@
 # Jenkins
+[![Release][release-svg]][release-link]
+
 Self-contained Jenkins for Docker
 
 ### Start Jenkins container
@@ -34,3 +36,6 @@ For updating Android SDK packages inside your workspace
 sh "android-update-sdk --components=platform-tools,tools,build-tools-24.0.2 --accept-licenses=android-sdk-license-.+"
 ````
 Example [Jenkinsfile](examples/android/Jenkinsfile) for Android projects
+
+[release-svg]: http://github-release-version.herokuapp.com/github/andrewkochura/jenkins-for-docker/release.svg?style=flat
+[release-link]: https://github.com/andrewkochura/jenkins-for-docker/releases/latest
